@@ -9,26 +9,36 @@
 # Get AWS Account ID (used in bucket naming to ensure uniqueness)
 data "aws_caller_identity" "current" {}
 
-# Create S3 bucket for Terraform state
+# ---------------------------
+# S3 Bucket for Terraform state
+# ---------------------------
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "${data.aws_caller_identity.current.account_id}-terraform-states"
+}
 
-  # Enable versioning to keep history of state files
-  versioning {
-    enabled = true
+# Enable versioning (keeps history of state files)
+resource "aws_s3_bucket_versioning" "terraform_state_versioning" {
+  bucket = aws_s3_bucket.terraform_state.id
+
+  versioning_configuration {
+    status = "Enabled"
   }
+}
 
-  # Enable server-side encryption by default
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
+# Enable server-side encryption (AES256)
+resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state_sse" {
+  bucket = aws_s3_bucket.terraform_state.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
     }
   }
 }
 
-# DynamoDB table for Terraform state locking
+# ---------------------------
+# DynamoDB table for state locking
+# ---------------------------
 resource "aws_dynamodb_table" "terraform_lock" {
   name         = "terraform-lock"
   billing_mode = "PAY_PER_REQUEST"
