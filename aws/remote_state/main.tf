@@ -1,22 +1,17 @@
-# main.tf
-# ---------------------------
-# Main Terraform configuration
 # Creates:
-#  - S3 bucket for storing Terraform state
-#  - DynamoDB table for state locking
-# ---------------------------
+# S3 bucket for storing Terraform state
+# DynamoDB table for state locking
 
 # Get AWS Account ID (used in bucket naming to ensure uniqueness)
 data "aws_caller_identity" "current" {}
 
-# ---------------------------
 # S3 Bucket for Terraform state
-# ---------------------------
+
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "${data.aws_caller_identity.current.account_id}-terraform-states"
 }
 
-# Enable versioning (keeps history of state files)
+# Enable versioning 
 resource "aws_s3_bucket_versioning" "terraform_state_versioning" {
   bucket = aws_s3_bucket.terraform_state.id
 
@@ -36,9 +31,9 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state_s
   }
 }
 
-# ---------------------------
+
 # DynamoDB table for state locking
-# ---------------------------
+
 resource "aws_dynamodb_table" "terraform_lock" {
   name         = "terraform-lock"
   billing_mode = "PAY_PER_REQUEST"
