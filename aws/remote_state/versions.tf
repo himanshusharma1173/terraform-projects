@@ -1,8 +1,5 @@
-# versions.tf
-# ---------------------------
 # Define required Terraform and provider versions
-# This ensures consistency across team members
-# ---------------------------
+
 
 terraform {
   required_version = ">= 1.3.0"
